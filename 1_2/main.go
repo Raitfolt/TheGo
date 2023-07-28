@@ -28,7 +28,7 @@ func main() {
 	//1.2
 	fmt.Println("Exercise 1.2")
 	for i, v := range os.Args {
-		fmt.Printf("%d: %s", i, v)
+		fmt.Printf("%d: %s\n", i, v)
 	}
 
 	//1.3
