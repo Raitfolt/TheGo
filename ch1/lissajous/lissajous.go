@@ -11,11 +11,11 @@ import (
 	"net/http"
 )
 
-var palette = []color.Color{color.White, color.Black}
+var palette = []color.Color{color.Black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}}
 
 const (
-	whiteIndex = 0
-	blackIndex = 1
+	blackIndex = iota
+	greenIndex
 )
 
 func main() {
@@ -43,15 +43,12 @@ func lissajous(out io.Writer) {
 	for i := 0; i < nframes; i++ {
 		rect := image.Rect(0, 0, 2*size+1, 2*size+1)
 
-		//green := color.RGBA{0x00, 0xFF, 0x00, 0xFF}
-		//palette = append(palette, green)
-
 		img := image.NewPaletted(rect, palette)
 
 		for t := 0.0; t < cycles*2*math.Pi; t += res {
 			x := math.Sin(t)
 			y := math.Sin(t*freq + phase)
-			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), blackIndex)
+			img.SetColorIndex(size+int(x*size+0.5), size+int(y*size+0.5), greenIndex)
 		}
 
 		phase += 0.1
