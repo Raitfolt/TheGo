@@ -5,10 +5,30 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 )
+
+const (
+	httpPrefix  = "http://"
+	httpsPrefix = "https://"
+)
+
+func hasHttpPrefix(s string) bool {
+	return strings.HasPrefix(s, httpPrefix)
+}
+
+func hasHttpsPrefix(s string) bool {
+	return strings.HasPrefix(s, httpsPrefix)
+}
 
 func main() {
 	for _, url := range os.Args[1:] {
+
+		if !hasHttpPrefix(url) && !hasHttpsPrefix(url) {
+			url = "http://" + url
+			fmt.Println("URL was complited with prefix \"http://\"")
+		}
+
 		resp, err := http.Get(url)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
