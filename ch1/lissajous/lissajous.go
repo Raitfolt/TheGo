@@ -14,11 +14,6 @@ import (
 
 var palette = []color.Color{color.Black, color.RGBA{0x00, 0xFF, 0x00, 0xFF}}
 
-const (
-	blackIndex = iota
-	greenIndex
-)
-
 func main() {
 
 	http.HandleFunc("/", handler)
