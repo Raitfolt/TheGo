@@ -1,3 +1,3 @@
-module github.com/Raitfolt/tempconv
+module github.com/Raitfolt/TheGo/ch2/tempconv
 
 go 1.20
