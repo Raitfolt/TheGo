@@ -11,129 +11,292 @@ import (
 )
 
 var (
-	baseMapData = []opts.MapData{
-		{Name: "北京", Value: float64(rand.Intn(150))},
-		{Name: "上海", Value: float64(rand.Intn(150))},
-		{Name: "广东", Value: float64(rand.Intn(150))},
-		{Name: "辽宁", Value: float64(rand.Intn(150))},
-		{Name: "山东", Value: float64(rand.Intn(150))},
-		{Name: "山西", Value: float64(rand.Intn(150))},
-		{Name: "陕西", Value: float64(rand.Intn(150))},
-		{Name: "新疆", Value: float64(rand.Intn(150))},
-		{Name: "内蒙古", Value: float64(rand.Intn(150))},
-	}
-
-	guangdongMapData = map[string]float64{
-		"深圳市": float64(rand.Intn(150)),
-		"广州市": float64(rand.Intn(150)),
-		"湛江市": float64(rand.Intn(150)),
-		"汕头市": float64(rand.Intn(150)),
-		"东莞市": float64(rand.Intn(150)),
-		"佛山市": float64(rand.Intn(150)),
-		"云浮市": float64(rand.Intn(150)),
-		"肇庆市": float64(rand.Intn(150)),
-		"梅州市": float64(rand.Intn(150)),
-	}
+	itemCntLine = 6
+	fruits      = []string{"Apple", "Banana", "Peach ", "Lemon", "Pear", "Cherry"}
 )
 
-func generateMapData(data map[string]float64) (items []opts.MapData) {
-	items = make([]opts.MapData, 0)
-	for k, v := range data {
-		items = append(items, opts.MapData{Name: k, Value: v})
+func generateLineItems() []opts.LineData {
+	items := make([]opts.LineData, 0)
+	for i := 0; i < itemCntLine; i++ {
+		items = append(items, opts.LineData{Value: rand.Intn(300)})
 	}
-	return
+	return items
 }
 
-func mapBase() *charts.Map {
-	mc := charts.NewMap()
-	mc.RegisterMapType("china")
-	mc.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{Title: "basic map example"}),
-	)
-
-	mc.AddSeries("map", baseMapData)
-	return mc
+func generateLineData(data []float32) []opts.LineData {
+	items := make([]opts.LineData, 0)
+	for i := 0; i < len(data); i++ {
+		items = append(items, opts.LineData{Value: data[i]})
+	}
+	return items
 }
 
-func mapShowLabel() *charts.Map {
-	mc := charts.NewMap()
-	mc.RegisterMapType("china")
-	mc.SetGlobalOptions(
-		charts.WithTitleOpts(opts.Title{Title: "show label"}),
+func lineBase() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{Title: "basic line example", Subtitle: "This is the subtitle."}),
 	)
 
-	mc.AddSeries("map", baseMapData).
+	line.SetXAxis(fruits).
+		AddSeries("Category A", generateLineItems())
+	return line
+}
+
+func lineShowLabel() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title:    "title and label options",
+			Subtitle: "go-echarts is an awesome chart library written in Golang",
+			Link:     "https://github.com/go-echarts/go-echarts",
+		}),
+	)
+
+	line.SetXAxis(fruits).
+		AddSeries("Category A", generateLineItems()).
 		SetSeriesOptions(
+			charts.WithLineChartOpts(opts.LineChart{
+				ShowSymbol: true,
+			}),
 			charts.WithLabelOpts(opts.Label{
 				Show: true,
 			}),
 		)
-	return mc
+	return line
 }
 
-func mapVisualMap() *charts.Map {
-	mc := charts.NewMap()
-	mc.RegisterMapType("china")
-	mc.SetGlobalOptions(
+func lineMarkPoint() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{
-			Title: "VisualMap",
-		}),
-		charts.WithVisualMapOpts(opts.VisualMap{
-			Calculable: true,
+			Title: "markpoint options",
 		}),
 	)
 
-	mc.AddSeries("map", baseMapData)
-	return mc
+	line.SetXAxis(fruits).AddSeries("Category A", generateLineItems()).
+		SetSeriesOptions(
+			charts.WithMarkPointNameTypeItemOpts(
+				opts.MarkPointNameTypeItem{Name: "Maximum", Type: "max"},
+				opts.MarkPointNameTypeItem{Name: "Average", Type: "average"},
+				opts.MarkPointNameTypeItem{Name: "Minimum", Type: "min"},
+			),
+			charts.WithMarkPointStyleOpts(
+				opts.MarkPointStyle{Label: &opts.Label{Show: true}}),
+		)
+	return line
 }
 
-func mapRegion() *charts.Map {
-	mc := charts.NewMap()
-	mc.RegisterMapType("广东")
-	mc.SetGlobalOptions(
+func lineSplitLine() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{
-			Title: "Guangdong province",
+			Title: "splitline options",
 		}),
-		charts.WithVisualMapOpts(opts.VisualMap{
-			Calculable: true,
-			InRange:    &opts.VisualMapInRange{Color: []string{"#50a3ba", "#eac736", "#d94e5d"}},
+		charts.WithYAxisOpts(opts.YAxis{
+			SplitLine: &opts.SplitLine{
+				Show: true,
+			},
 		}),
 	)
 
-	mc.AddSeries("map", generateMapData(guangdongMapData))
-	return mc
+	line.SetXAxis(fruits).AddSeries("Category A", generateLineItems(),
+		charts.WithLabelOpts(
+			opts.Label{Show: true},
+		))
+	return line
 }
 
-func mapTheme() *charts.Map {
-	mc := charts.NewMap()
-	mc.RegisterMapType("china")
-	mc.SetGlobalOptions(
+func lineStep() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "step style",
+		}),
+	)
+
+	line.SetXAxis(fruits).AddSeries("Category A", generateLineItems()).
+		SetSeriesOptions(charts.WithLineChartOpts(
+			opts.LineChart{
+				Step: true,
+			}),
+		)
+	return line
+}
+
+func lineSmooth() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "smooth style",
+		}),
+	)
+
+	line.SetXAxis(fruits).AddSeries("Category A", generateLineItems()).
+		SetSeriesOptions(charts.WithLineChartOpts(
+			opts.LineChart{
+				Smooth: true,
+			}),
+		)
+	return line
+}
+
+func lineArea() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "area options",
+		}),
+	)
+
+	line.SetXAxis(fruits).AddSeries("Category A", generateLineItems()).
+		SetSeriesOptions(
+			charts.WithLabelOpts(
+				opts.Label{
+					Show: true,
+				}),
+			charts.WithAreaStyleOpts(
+				opts.AreaStyle{
+					Opacity: 0.2,
+				}),
+		)
+	return line
+}
+
+func lineSmoothArea() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{Title: "smooth area"}),
+	)
+
+	line.SetXAxis(fruits).AddSeries("Category A", generateLineItems()).
+		SetSeriesOptions(
+			charts.WithLabelOpts(opts.Label{
+				Show: true,
+			}),
+			charts.WithAreaStyleOpts(opts.AreaStyle{
+				Opacity: 0.2,
+			}),
+			charts.WithLineChartOpts(opts.LineChart{
+				Smooth: true,
+			}),
+		)
+	return line
+}
+
+func lineOverlap() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{Title: "overlap rect-charts"}),
+	)
+
+	line.SetXAxis(fruits).
+		AddSeries("Category A", generateLineItems())
+	//line.Overlap(esEffectStyle())
+	//line.Overlap(scatterBase())
+	return line
+}
+
+func lineMulti() *charts.Line {
+	line := charts.NewLine()
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "multi lines",
+		}),
 		charts.WithInitializationOpts(opts.Initialization{
-			Theme: "macarons",
-		}),
-		charts.WithTitleOpts(opts.Title{
-			Title: "Map-theme",
-		}),
-		charts.WithVisualMapOpts(opts.VisualMap{
-			Calculable: true,
-			Max:        150,
+			Theme: "shine",
 		}),
 	)
 
-	mc.AddSeries("map", baseMapData)
-	return mc
+	line.SetXAxis(fruits).
+		AddSeries("Category  A", generateLineItems()).
+		AddSeries("Category  B", generateLineItems()).
+		AddSeries("Category  C", generateLineItems()).
+		AddSeries("Category  D", generateLineItems())
+	return line
 }
 
-type MapExamples struct{}
+func lineDemo() *charts.Line {
+	line := charts.NewLine()
+
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "Search Time: Hash table vs Binary search",
+		}),
+		charts.WithYAxisOpts(opts.YAxis{
+			Name: "Cost time(ns)",
+			SplitLine: &opts.SplitLine{
+				Show: false,
+			},
+		}),
+		charts.WithXAxisOpts(opts.XAxis{
+			Name: "Elements",
+		}),
+	)
+
+	line.SetXAxis([]string{"10e1", "10e2", "10e3", "10e4", "10e5", "10e6", "10e7"}).
+		AddSeries("map", generateLineItems(),
+			charts.WithLabelOpts(opts.Label{Show: true, Position: "bottom"})).
+		AddSeries("slice", generateLineData([]float32{24.9, 34.9, 48.1, 58.3, 69.7, 123, 131}),
+			charts.WithLabelOpts(opts.Label{Show: true, Position: "top"})).
+		SetSeriesOptions(
+			charts.WithMarkLineNameTypeItemOpts(opts.MarkLineNameTypeItem{
+				Name: "Average",
+				Type: "average",
+			}),
+			charts.WithLineChartOpts(opts.LineChart{
+				Smooth: true,
+			}),
+			charts.WithMarkPointStyleOpts(opts.MarkPointStyle{
+				Label: &opts.Label{
+					Show:      true,
+					Formatter: "{a}: {b}",
+				},
+			}),
+		)
+
+	return line
+}
+
+func lineSymbols() *charts.Line {
+
+	line := charts.NewLine()
+	// set some global options like Title/Legend/ToolTip or anything else
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title:    "symbol options",
+			Subtitle: "tooltip with 'axis' trigger",
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{Show: true, Trigger: "axis"}),
+	)
+
+	// Put data into instance
+	line.SetXAxis(fruits).
+		AddSeries("Category A", generateLineItems()).
+		AddSeries("Category B", generateLineItems()).
+		SetSeriesOptions(charts.WithLineChartOpts(
+			opts.LineChart{Smooth: false, ShowSymbol: true, SymbolSize: 15, Symbol: "diamond"},
+		))
+
+	return line
+}
+
+type LineExamples struct{}
 
 func httpserver(w http.ResponseWriter, _ *http.Request) {
 	page := components.NewPage()
 	page.AddCharts(
-		mapBase(),
-		mapShowLabel(),
-		mapVisualMap(),
-		mapRegion(),
-		mapTheme(),
+		lineBase(),
+		lineShowLabel(),
+		lineSymbols(),
+		lineMarkPoint(),
+		lineSplitLine(),
+		lineStep(),
+		lineSmooth(),
+		lineArea(),
+		lineSmoothArea(),
+		lineOverlap(),
+		lineMulti(),
+		lineDemo(),
 	)
 
 	page.Render(io.MultiWriter(w))
