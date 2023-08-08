@@ -2,52 +2,42 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"os"
-
-	"golang.org/x/net/html"
+	"strings"
 )
 
+func square(n int) int {
+	return n * n
+}
+
+func negative(n int) int {
+	return -n
+}
+
+func product(m, n int) int {
+	return m * n
+}
+
 func main() {
-	for _, url := range os.Args[1:] {
-		links, err := findLinks(url)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "findlinks2: %v\n", err)
-			continue
+
+	defer func() {
+		if recover() != nil {
+			fmt.Println("Was panic")
 		}
-		for _, link := range links {
-			fmt.Println(link)
-		}
-	}
+	}()
+
+	f := square
+	fmt.Println(f(3))
+
+	f = negative
+	fmt.Println(f(3))
+	fmt.Printf("%T\n", f)
+
+	f2 := product
+	fmt.Println(f2(3, 5))
+
+	fmt.Println(strings.Map(add1, "Hello, world"))
 }
 
-func findLinks(url string) ([]string, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode != http.StatusOK {
-		resp.Body.Close()
-		return nil, fmt.Errorf("analize %s as HTML: %v", url, err)
-	}
-	doc, err := html.Parse(resp.Body)
-	resp.Body.Close()
-	if err != nil {
-		return nil, fmt.Errorf("analize %s as HTML: %v", url, err)
-	}
-	return visit(nil, doc), nil
-}
-
-func visit(links []string, n *html.Node) []string {
-	if n.Type == html.ElementNode && n.Data == "a" {
-		for _, a := range n.Attr {
-			if a.Key == "href" {
-				links = append(links, a.Val)
-			}
-		}
-	}
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		links = visit(links, c)
-	}
-	return links
+func add1(r rune) rune {
+	return r + 1
 }
