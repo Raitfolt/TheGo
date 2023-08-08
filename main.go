@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
@@ -11,42 +9,40 @@ import (
 )
 
 func main() {
-	reader := bytes.NewReader(fetch())
-	doc, err := html.Parse(reader)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "findlinks1: %v\n", err)
-		os.Exit(1)
+	for _, url := range os.Args[1:] {
+		links, err := findLinks(url)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "findlinks2: %v\n", err)
+			continue
+		}
+		for _, link := range links {
+			fmt.Println(link)
+		}
 	}
-	for _, link := range visit(nil, doc) {
-		fmt.Println(link)
-	}
-
-	reader = bytes.NewReader(fetch())
-	doc, err = html.Parse(reader)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "outline: %v\n", err)
-		os.Exit(1)
-	}
-	outline(nil, doc)
 }
 
-func outline(stack []string, n *html.Node) {
-	if n.Type == html.ElementNode {
-		stack = append(stack, n.Data)
-		fmt.Println(stack)
+func findLinks(url string) ([]string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
 	}
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		outline(stack, c)
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, fmt.Errorf("analize %s as HTML: %v", url, err)
 	}
+	doc, err := html.Parse(resp.Body)
+	resp.Body.Close()
+	if err != nil {
+		return nil, fmt.Errorf("analize %s as HTML: %v", url, err)
+	}
+	return visit(nil, doc), nil
 }
 
 func visit(links []string, n *html.Node) []string {
 	if n.Type == html.ElementNode && n.Data == "a" {
 		for _, a := range n.Attr {
 			if a.Key == "href" {
-				if a.Val != "#" {
-					links = append(links, a.Val)
-				}
+				links = append(links, a.Val)
 			}
 		}
 	}
@@ -54,23 +50,4 @@ func visit(links []string, n *html.Node) []string {
 		links = visit(links, c)
 	}
 	return links
-}
-
-func fetch() (result []byte) {
-	result = make([]byte, 0)
-	for _, url := range os.Args[1:] {
-		resp, err := http.Get(url)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "fetch: %v\n", err)
-			os.Exit(1)
-		}
-		b, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "fetch: reading %s: %v\n", url, err)
-			os.Exit(1)
-		}
-		result = append(result, b...)
-	}
-	return
 }
