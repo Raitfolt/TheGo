@@ -1,4 +1,4 @@
-module github.com/Raitfolt/TheGo/ch5/findlinks1
+module github.com/Raitfot/TheGo
 
 go 1.20
 
