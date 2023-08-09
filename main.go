@@ -17,6 +17,14 @@ func product(m, n int) int {
 	return m * n
 }
 
+func squaresF() func() int {
+	var x int
+	return func() int {
+		x++
+		return x * x
+	}
+}
+
 func main() {
 
 	defer func() {
@@ -36,6 +44,19 @@ func main() {
 	fmt.Println(f2(3, 5))
 
 	fmt.Println(strings.Map(add1, "Hello, world"))
+
+	fmt.Println(strings.Map(func(r rune) rune { return r + 2 }, "Hello, world"))
+
+	sF := squaresF()
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
+	fmt.Println(sF())
 }
 
 func add1(r rune) rune {
